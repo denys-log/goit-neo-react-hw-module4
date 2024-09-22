@@ -1,35 +1,81 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { Toaster } from 'react-hot-toast';
+import SearchBox from './components/SearchBox/SearchBox';
+import ImageGallery from './components/ImageGallery/ImageGallery';
+import Loader from './components/Loader/Loader';
+import ErrorMessage from './components/ErrorMessage/ErrorMessage';
+import LoadMoreBtn from './components/LoadMoreBtn/LoadMoreBtn';
+import { getPhotosByName } from './gallery-api';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [currentQuery, setCurrentQuery] = useState('');
+  const [page, setPage] = useState(1);
+
+  const handleSearch = async value => {
+    if (value !== currentQuery) {
+      setPage(1);
+    }
+
+    if (!isLoading || value !== currentQuery) {
+      setCurrentQuery(value);
+
+      try {
+        setIsLoading(true);
+        const data = await getPhotosByName(value);
+        setImages(data.results);
+        setError(false);
+      } catch {
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleLoadMore = async () => {
+    if (!isLoading) {
+      try {
+        setIsLoading(true);
+        const data = await getPhotosByName(currentQuery, page + 1);
+        setPage(prevState => prevState + 1);
+        setImages(prevState => [...prevState, ...data.results]);
+        setTimeout(() => {
+          window.scrollBy({
+            top:
+              document.querySelector('.image-card').getBoundingClientRect()
+                .height * 2,
+            left: 0,
+            behavior: 'smooth',
+          });
+        }, 100);
+        setError(false);
+      } catch {
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <SearchBox onSubmit={handleSearch} />
+
+      {images.length > 0 && <ImageGallery images={images} />}
+
+      <div className="center">
+        {isLoading && <Loader />}
+        {error && <ErrorMessage />}
+
+        {images.length > 0 && <LoadMoreBtn onClick={handleLoadMore} />}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+      <Toaster position="top-right" />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
