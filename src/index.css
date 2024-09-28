@@ -107,3 +107,36 @@ ol {
   height: 100%;
   object-fit: cover;
 }
+
+.ReactModal__Overlay {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.ReactModal__Content {
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.ReactModal__Content img {
+  max-width: 90vh;
+  max-height: 90vh;
+}
+
+.image-card {
+  transition: transform 0.6s;
+  cursor: pointer;
+}
+
+.image-card:hover {
+  transform: scale(1.03);
+}
+
+.load-more {
+  background-color: teal;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  margin: 20px;
+}

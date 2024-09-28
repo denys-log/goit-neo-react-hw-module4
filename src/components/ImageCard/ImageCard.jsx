@@ -1,6 +1,6 @@
-export default function ImageCard({ src, alt }) {
+export default function ImageCard({ src, alt, onClick }) {
   return (
-    <div className="image-card">
+    <div className="image-card" onClick={onClick}>
       <img src={src} alt={alt} width={300} height={300} />
     </div>
   );

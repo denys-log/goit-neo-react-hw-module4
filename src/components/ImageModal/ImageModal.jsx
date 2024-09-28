@@ -10,20 +10,14 @@ const customStyles = {
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
+    backgroundColor: 'transparent',
   },
 };
 
-export default function ImageModal({ isOpen, onClose }) {
+export default function ImageModal({ isOpen, onClose, src, alt }) {
   return (
-    <Modal
-      isOpen={isOpen}
-      // onAfterOpen={afterOpenModal}
-      onRequestClose={onClose}
-      style={customStyles}
-      contentLabel="Example Modal"
-    >
-      <button onClick={onClose}>close</button>
-      <div>I am a modal</div>
+    <Modal isOpen={isOpen} onRequestClose={onClose} style={customStyles}>
+      <img src={src} alt={alt} />
     </Modal>
   );
 }

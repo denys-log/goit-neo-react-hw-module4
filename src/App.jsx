@@ -1,79 +1,83 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import SearchBox from './components/SearchBox/SearchBox';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Loader from './components/Loader/Loader';
 import ErrorMessage from './components/ErrorMessage/ErrorMessage';
 import LoadMoreBtn from './components/LoadMoreBtn/LoadMoreBtn';
-import { getPhotosByName } from './gallery-api';
+import ImageModal from './components/ImageModal/ImageModal';
+import { getPhotosByName } from './services/api';
 
 function App() {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentQuery, setCurrentQuery] = useState('');
+  const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
+  const [totalPage, setTotalPages] = useState(0);
+  const [modal, setModal] = useState({ isOpen: false, src: '', alt: '' });
 
-  const handleSearch = async value => {
-    if (value !== currentQuery) {
-      setPage(1);
-    }
+  useEffect(() => {
+    if (!query) return;
 
-    if (!isLoading || value !== currentQuery) {
-      setCurrentQuery(value);
+    setIsLoading(true);
 
-      try {
-        setIsLoading(true);
-        const data = await getPhotosByName(value);
-        setImages(data.results);
+    getPhotosByName(query, page)
+      .then(data => {
+        setImages(prevState => [...prevState, ...data.results]);
         setError(false);
-      } catch {
+        setTotalPages(data.total_pages);
+        if (page > 1) {
+          setTimeout(() => {
+            window.scrollBy({
+              top:
+                document.querySelector('.image-card').getBoundingClientRect()
+                  .height * 2,
+              left: 0,
+              behavior: 'smooth',
+            });
+          }, 100);
+        }
+      })
+      .catch(() => {
         setError(true);
-      } finally {
+      })
+      .finally(() => {
         setIsLoading(false);
-      }
-    }
+      });
+  }, [query, page]);
+
+  const handleLoadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  const handleLoadMore = async () => {
-    if (!isLoading) {
-      try {
-        setIsLoading(true);
-        const data = await getPhotosByName(currentQuery, page + 1);
-        setPage(prevState => prevState + 1);
-        setImages(prevState => [...prevState, ...data.results]);
-        setTimeout(() => {
-          window.scrollBy({
-            top:
-              document.querySelector('.image-card').getBoundingClientRect()
-                .height * 2,
-            left: 0,
-            behavior: 'smooth',
-          });
-        }, 100);
-        setError(false);
-      } catch {
-        setError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  const handleSubmit = value => {
+    setQuery(value);
+  };
+
+  const handleImageClick = ({ src, alt }) => {
+    setModal({ isOpen: true, src, alt });
   };
 
   return (
     <>
-      <SearchBox onSubmit={handleSearch} />
+      <SearchBox onSubmit={handleSubmit} />
 
-      {images.length > 0 && <ImageGallery images={images} />}
+      {images.length > 0 && (
+        <ImageGallery images={images} onClick={handleImageClick} />
+      )}
 
       <div className="center">
         {isLoading && <Loader />}
         {error && <ErrorMessage />}
 
-        {images.length > 0 && <LoadMoreBtn onClick={handleLoadMore} />}
+        {page < totalPage && images.length > 0 && !isLoading && (
+          <LoadMoreBtn onClick={handleLoadMore} />
+        )}
       </div>
 
       <Toaster position="top-right" />
+      <ImageModal {...modal} onClose={() => setModal({ isOpen: false })} />
     </>
   );
 }
