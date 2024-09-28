@@ -52,7 +52,13 @@ function App() {
   };
 
   const handleSubmit = value => {
-    setQuery(value);
+    if (value !== query) {
+      setImages([]);
+      setPage(1);
+      setQuery(value);
+      setError(null);
+      setTotalPages(0);
+    }
   };
 
   const handleImageClick = ({ src, alt }) => {
