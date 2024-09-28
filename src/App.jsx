@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import SearchBox from './components/SearchBox/SearchBox';
+import SearchBar from './components/SearchBar/SearchBar';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Loader from './components/Loader/Loader';
 import ErrorMessage from './components/ErrorMessage/ErrorMessage';
@@ -61,7 +61,7 @@ function App() {
 
   return (
     <>
-      <SearchBox onSubmit={handleSubmit} />
+      <SearchBar onSubmit={handleSubmit} />
 
       {images.length > 0 && (
         <ImageGallery images={images} onClick={handleImageClick} />

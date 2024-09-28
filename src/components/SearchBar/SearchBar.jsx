@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast';
 
-export default function SearchBox({ onSubmit }) {
+export default function SearchBar({ onSubmit }) {
   const handleFormSubmit = e => {
     e.preventDefault();
     const value = e.target.elements.query.value;
